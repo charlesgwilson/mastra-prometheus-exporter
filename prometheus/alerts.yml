@@ -1,0 +1,28 @@
+# Example alert rules for mastra-prometheus-exporter. Tune thresholds to your SLOs.
+# These reference the recording rules in recording-rules.yml.
+groups:
+  - name: mastra-alerts
+    rules:
+      - alert: MastraAgentLatencyP95High
+        expr: mastra:agent_latency_p95_seconds:5m > 10
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "Agent p95 latency high"
+          description: "{{ $labels.entity }} p95 latency is {{ $value }}s (>10s)"
+
+      - alert: MastraAgentErrorRatioHigh
+        expr: mastra:agent_error_ratio:5m > 0.05
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          summary: "Agent error ratio > 5%"
+          description: "{{ $labels.entity }} error ratio is {{ $value | humanizePercentage }}"
+
+      - alert: MastraExporterDroppingEvents
+        expr: increase(mastra_exporter_dropped_events_total[10m]) > 0
+        for: 0m
+        labels: { severity: info }
+        annotations:
+          summary: "Exporter dropped observability events"
+          description: "reason={{ $labels.reason }} — the exporter is under-reporting metrics"

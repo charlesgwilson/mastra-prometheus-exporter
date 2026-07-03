@@ -1,0 +1,32 @@
+# Recording rules for mastra-prometheus-exporter.
+# Load in Prometheus via rule_files. Precompute the expensive/derived series.
+groups:
+  - name: mastra-recording
+    interval: 30s
+    rules:
+      # Windowed p95 latency per agent (histograms make this correct across instances).
+      - record: mastra:agent_latency_p95_seconds:5m
+        expr: histogram_quantile(0.95, sum by (le, entity) (rate(mastra_agent_duration_seconds_bucket[5m])))
+
+      - record: mastra:model_latency_p95_seconds:5m
+        expr: histogram_quantile(0.95, sum by (le, entity) (rate(mastra_model_duration_seconds_bucket[5m])))
+
+      # Error ratio per agent (status is a label on the duration histogram's _count).
+      - record: mastra:agent_error_ratio:5m
+        expr: |
+          sum by (entity) (rate(mastra_agent_duration_seconds_count{status="error"}[5m]))
+          /
+          clamp_min(sum by (entity) (rate(mastra_agent_duration_seconds_count[5m])), 1e-9)
+
+      - record: mastra:model_tokens_per_second:5m
+        expr: sum by (model, direction) (rate(mastra_model_tokens_total[5m]))
+
+      # Authoritative cost = tokens x price. Prefer deriving it here (prices drift)
+      # over trusting mastra_model_cost_usd_total. Provide a price table as a static
+      # series, e.g. via a `mastra_model_price_usd_per_token{model,direction}` recording
+      # rule or an external file, then:
+      #
+      #   - record: mastra:model_cost_usd_per_second:5m
+      #     expr: |
+      #       sum by (model, direction) (rate(mastra_model_tokens_total[5m]))
+      #       * on (model, direction) group_left mastra_model_price_usd_per_token

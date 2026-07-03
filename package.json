@@ -1,0 +1,64 @@
+{
+  "name": "mastra-prometheus-exporter",
+  "version": "0.1.0",
+  "description": "A store-free Prometheus exporter for Mastra — turns Mastra's observability metric events into prom-client counters/histograms. No DuckDB/ClickHouse required.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "prometheus",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test test/*.test.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mastra",
+    "prometheus",
+    "exporter",
+    "prom-client",
+    "observability",
+    "metrics",
+    "ai-agents",
+    "llm",
+    "openmetrics"
+  ],
+  "license": "MIT",
+  "author": "Greg Wilson <greg@imawilson.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/charlesgwilson/mastra-prometheus-exporter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/charlesgwilson/mastra-prometheus-exporter/issues"
+  },
+  "homepage": "https://github.com/charlesgwilson/mastra-prometheus-exporter#readme",
+  "engines": {
+    "node": ">=18"
+  },
+  "peerDependencies": {
+    "prom-client": "^15.0.0",
+    "@mastra/observability": ">=1"
+  },
+  "peerDependenciesMeta": {
+    "@mastra/observability": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "prom-client": "^15.1.3",
+    "@types/node": "^22.20.0",
+    "typescript": "^5.9.3"
+  }
+}
